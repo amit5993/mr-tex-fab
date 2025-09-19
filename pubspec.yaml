@@ -1,0 +1,160 @@
+name: td
+description: A new Flutter project.
+
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+
+#  Flutter 3.24.5 • channel stable • https://github.com/flutter/flutter.git
+#  Framework • revision dec2ee5c1f (5 months ago) • 2024-11-13 11:13:06 -0800
+#  Engine • revision a18df97ca5
+#  Tools • Dart 3.5.4 • DevTools 2.37.3
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.3 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+
+  # The following adds the Cupertino Icons font to your application.
+  # Use with the CupertinoIcons class for iOS style icons.
+  cupertino_icons: ^1.0.8
+  get: ^4.6.6
+  shared_preferences: ^2.2.3
+  fluttertoast: ^8.2.5
+  http: ^1.2.1
+  flutter_easyloading: ^3.0.5
+  connectivity_plus: ^6.1.0
+  syncfusion_flutter_datepicker: ^27.2.4
+  #  syncfusion_flutter_pdfviewer: ^26.1.41
+  syncfusion_flutter_pdfviewer: ^27.2.4
+  syncfusion_flutter_pdf: ^27.2.4
+  path_provider: ^2.1.3
+  dio: ^5.4.3+1
+  flutter_widget_from_html: ^0.15.0
+#  share_plus: ^9.0.0
+  share_plus: ^10.1.4
+  url_launcher: ^6.2.6
+  photo_view: ^0.15.0
+  image_picker: ^1.1.1
+  permission_handler: ^11.3.1
+  flutter_barcode_scanner: ^2.0.0
+  system_proxy: ^0.1.0
+  package_info_plus: ^8.0.0
+  device_info_plus: ^10.1.0
+  unique_identifier: ^0.4.0
+  auto_size_text: ^3.0.0
+  carousel_slider_plus: ^7.0.1
+  cached_network_image: ^3.3.1
+  video_player: ^2.9.2
+  google_mlkit_barcode_scanning: ^0.10.0
+  flutter_speed_dial: ^7.0.0
+  pdfx: 2.8.0
+  syncfusion_flutter_charts: ^27.2.4
+  intl: ^0.18.0
+#  speech_to_text: ^7.0.0
+
+
+dev_dependencies:
+  #  flutter pub run flutter_launcher_icons
+  flutter_launcher_icons: ^0.13.1
+  flutter_test:
+    sdk: flutter
+
+  # The "flutter_lints" package below contains a set of recommended lints to
+  # encourage good coding practices. The lint set provided by the package is
+  # activated in the `analysis_options.yaml` file located at the root of your
+  # package. See that file for information about deactivating specific lint
+  # rules and activating additional ones.
+  flutter_lints: ^4.0.0
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  remove_alpha_ios: true
+  image_path: "assets/icons/app_icon.png"
+
+# For information on the generic Dart part of this file, see the
+# following page: https://dart.dev/tools/pub/pubspec
+
+# The following section is specific to Flutter packages.
+flutter:
+
+  # The following line ensures that the Material Icons font is
+  # included with your application, so that you can use the icons in
+  # the material Icons class.
+  uses-material-design: true
+
+  # To add assets to your application, add an assets section, like this:
+  assets:
+    - assets/icons/ic_back.png
+    - assets/icons/app_icon.png
+    - assets/icons/ic_user_black.png
+    - assets/icons/ic_edit.png
+    - assets/icons/ic_copy.png
+    - assets/icons/ic_delete.png
+    - assets/icons/ic_delete_fill.png
+    - assets/icons/ic_ture.png
+    - assets/icons/ic_close.png
+    - assets/icons/pdf.png
+    - assets/icons/ic_call.png
+    - assets/icons/ic_whatsapp.png
+    - assets/icons/ic_whatsapp_black.png
+    - assets/icons/ic_call_black.png
+    - assets/icons/ic_mail.png
+    - assets/icons/ic_account.png
+    - assets/icons/ic_filter_clear.png
+    - assets/icons/ic_filter.png
+    - assets/icons/ic_attach.png
+    - assets/icons/ic_android.png
+    - assets/icons/ic_apple.png
+    - assets/icons/ic_sort.png
+    - assets/icons/ic_info.png
+    - assets/icons/ic_save.png
+    - assets/icons/ic_plus.png
+    - assets/icons/ic_scan.png
+    - assets/icons/ic_check.png
+    - assets/icons/ic_logout.png
+    - assets/icons/ic_printer.png
+
+    - assets/images/app_logo.png
+    - assets/images/splash_bkg.jpg
+    - assets/images/no_image.jpg
+    - assets/images/images1.jpeg
+    - assets/images/images2.jpeg
+    - assets/images/images3.jpeg
+    - assets/images/images4.jpeg
+    - assets/images/images5.jpeg
+    - assets/images/images6.jpeg
+    - assets/images/images7.jpeg
+    - assets/images/images8.jpeg
+    - assets/images/images9.jpeg
+    - assets/images/images10.jpeg
+    - assets/images/images11.jpeg
+    - assets/images/images12.jpeg
+
+    - assets/gif/splash.mp4
+
+  # An image asset can refer to one or more resolution-specific "variants", see
+  # https://flutter.dev/assets-and-images/#resolution-aware
+
+  # For details regarding adding assets from package dependencies, see
+  # https://flutter.dev/assets-and-images/#from-packages
+
+  # To add custom fonts to your application, add a fonts section here,
+  # in this "flutter" section. Each entry in this list should have a
+  # "family" key with the font family name, and a "fonts" key with a
+  # list giving the asset and other descriptors for the font. For
+  # example:
+  # fonts:
+  fonts:
+    - family: Regular
+      fonts:
+        - asset: assets/fonts/Roboto-Regular.ttf
+    - family: Medium
+      fonts:
+        - asset: assets/fonts/Roboto-Medium.ttf
+  # For details regarding fonts from package dependencies,
+  # see https://flutter.dev/custom-fonts/#from-packages

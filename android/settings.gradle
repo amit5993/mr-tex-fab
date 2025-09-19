@@ -1,0 +1,44 @@
+pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+
+    // Set up resolution strategy for the Flutter Gradle plugin
+    resolutionStrategy {
+        eachPlugin {
+            if (requested.id.id == 'dev.flutter.flutter-gradle-plugin') {
+                def flutterSdkPath = getFlutterSdkPath()
+                useModule("${flutterSdkPath}/packages/flutter_tools/gradle/flutter_gradle_plugin:flutter_gradle_plugin")
+            }
+        }
+    }
+}
+
+// Function to get Flutter SDK path from local.properties
+String getFlutterSdkPath() {
+    def properties = new Properties()
+    def propertiesFile = new File(rootProject.projectDir, "local.properties")
+    if (propertiesFile.exists()) {
+        properties.load(new FileInputStream(propertiesFile))
+        def flutterSdkPath = properties.getProperty("flutter.sdk")
+        assert flutterSdkPath != null, "flutter.sdk not set in local.properties"
+        return flutterSdkPath
+    } else {
+        throw new GradleException("local.properties not found")
+    }
+}
+
+// Include the app project
+include ':app'
+
+def localPropertiesFile = new File(rootProject.projectDir, "local.properties")
+def properties = new Properties()
+
+assert localPropertiesFile.exists()
+localPropertiesFile.withReader("UTF-8") { reader -> properties.load(reader) }
+
+def flutterSdkPath = properties.getProperty("flutter.sdk")
+assert flutterSdkPath != null, "flutter.sdk not set in local.properties"
+apply from: "$flutterSdkPath/packages/flutter_tools/gradle/app_plugin_loader.gradle"
