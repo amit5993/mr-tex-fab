@@ -574,33 +574,273 @@ class _MainScreenState extends State<MainScreen> implements MainView {
 
   Widget dashboard() {
     return Container(
+      height: double.infinity,
       color: colorBG,
-      child: Column(
-        children: [
-          bannerList.isNotEmpty ? topBanner() : topWidget(),
-          // topWidget(),
-          verticalViewSmall(),
-          dashboardGridWidget(),
-        ],
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Top section with banner or user profile
+            bannerList.isNotEmpty ? topBanner() : modernTopWidget(),
+
+            // Welcome section with last sync info
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 20, 16, 5),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Welcome, ${userData!.value!.firstName!}',
+                    style: heading1(colorApp),
+                  ),
+                  const SizedBox(height: 5),
+                  Visibility(
+                    visible: lastUpdate.isNotEmpty,
+                    child: Row(
+                      children: [
+                        Icon(Icons.sync, size: 14, color: colorText.withOpacity(0.7)),
+                        const SizedBox(width: 5),
+                        Text(
+                          'Last Sync: $lastUpdate',
+                          style: bodyText2(colorText.withOpacity(0.7)),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // Quick actions section
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 15, 16, 10),
+              child: Text(
+                'Quick Actions',
+                style: heading2(colorBlack),
+              ),
+            ),
+
+            // Modern menu grid
+            modernDashboardGridWidget(),
+
+            // Additional info section (if needed)
+            // Padding(
+            //   padding: const EdgeInsets.all(16.0),
+            //   child: Container(
+            //     width: double.infinity,
+            //     decoration: BoxDecoration(
+            //       color: colorWhite,
+            //       borderRadius: BorderRadius.circular(12),
+            //       boxShadow: [
+            //         BoxShadow(
+            //           color: Colors.black.withOpacity(0.05),
+            //           blurRadius: 10,
+            //           offset: const Offset(0, 2),
+            //         ),
+            //       ],
+            //     ),
+            //     child: Padding(
+            //       padding: const EdgeInsets.all(16.0),
+            //       child: Column(
+            //         crossAxisAlignment: CrossAxisAlignment.start,
+            //         children: [
+            //           Row(
+            //             children: [
+            //               Icon(Icons.business, color: colorApp),
+            //               const SizedBox(width: 10),
+            //               Text(
+            //                 'Company Information',
+            //                 style: heading2(colorBlack),
+            //               ),
+            //             ],
+            //           ),
+            //           const SizedBox(height: 10),
+            //           Text(
+            //             selectedCompany?.name ?? 'No company selected',
+            //             style: bodyText1(colorText),
+            //           ),
+            //           const SizedBox(height: 15),
+            //           InkWell(
+            //             onTap: () {
+            //               _presenter!.getCompany();
+            //             },
+            //             child: Container(
+            //               padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+            //               decoration: BoxDecoration(
+            //                 color: colorApp.withOpacity(0.1),
+            //                 borderRadius: BorderRadius.circular(20),
+            //                 border: Border.all(color: colorApp, width: 1),
+            //               ),
+            //               child: Text(
+            //                 'Change Company',
+            //                 style: bodyText2(colorApp),
+            //               ),
+            //             ),
+            //           ),
+            //         ],
+            //       ),
+            //     ),
+            //   ),
+            // ),
+          ],
+        ),
       ),
     );
+  }
 
-    // return Container(
-    //     constraints: BoxConstraints.loose(Size.fromHeight(60.0)),
-    //     decoration: BoxDecoration(color: Colors.black),
-    //     child: Stack(
-    //         clipBehavior: Clip.none,
-    //         alignment: Alignment.topCenter,
-    //         children: [
-    //           Positioned(
-    //               top: -10.0,
-    //               left: 15.0,
-    //               right: 15.0,
-    //               child: Text(
-    //                 "OUTSIDE CONTAINER",
-    //                 style: TextStyle(color: Colors.red, fontSize: 24.0),
-    //               ))
-    //         ]));
+  Widget modernTopWidget() {
+    return Container(
+      width: MediaQuery.of(context).size.width,
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [colorApp, Color(0xFF3a7bd5)],
+        ),
+        borderRadius: const BorderRadius.only(
+          bottomLeft: Radius.circular(30),
+          bottomRight: Radius.circular(30),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 40),
+        child: Row(
+          children: [
+            Container(
+              height: 80,
+              width: 80,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 8,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+              ),
+              child: ClipOval(
+                child: userData!.value!.clientLogo!.isNotEmpty
+                    ? FadeInImage.assetNetwork(
+                  placeholder: appIcon,
+                  image: userData!.value!.clientLogo!,
+                  fit: BoxFit.cover,
+                  imageErrorBuilder: (context, error, stackTrace) {
+                    return Image.asset(appIcon);
+                  },
+                )
+                    : Image.asset(appIcon),
+              ),
+            ),
+            const SizedBox(width: 20),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    userData!.value!.firstName!,
+                    style: heading1(colorWhite),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 5),
+                  Text(
+                    userData!.value!.roleName!,
+                    style: bodyText2(colorWhite.withOpacity(0.9)),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget modernDashboardGridWidget() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      child: GridView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 3,
+          crossAxisSpacing: 12,
+          mainAxisSpacing: 12,
+          childAspectRatio: 0.9,
+        ),
+        itemCount: dashboardList.length,
+        itemBuilder: (BuildContext ctx, index) {
+          var data = dashboardList[index];
+          return InkWell(
+            onTap: () {
+              _onTapMenu(data);
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                color: colorWhite,
+                borderRadius: BorderRadius.circular(15),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 5,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    height: 50,
+                    width: 50,
+                    decoration: BoxDecoration(
+                      color: colorApp.withOpacity(0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Center(
+                      child: Image.network(
+                        data.iconUrl!,
+                        height: 28,
+                        width: 28,
+                        color: colorApp,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Icon(
+                            Icons.apps,
+                            color: colorApp,
+                            size: 28,
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Text(
+                      data.menuDisplayName!,
+                      textAlign: TextAlign.center,
+                      maxLines: 2,
+                      style: bodyText2(colorText),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
   }
 
   Widget topBanner() {
