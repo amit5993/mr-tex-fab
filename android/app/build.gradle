@@ -52,8 +52,8 @@ android {
         applicationId "com.mrtex.fab"
         minSdkVersion 21
         targetSdkVersion 35//flutter.targetSdkVersion
-        versionCode 27
-        versionName "2.0.3"
+        versionCode 1
+        versionName "1.0.0"
 
 //        storePassword 'technodesk'
 //        keyAlias 'key0'

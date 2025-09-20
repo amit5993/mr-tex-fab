@@ -47,8 +47,6 @@ class _LoginState extends State<Login> implements LoginView {
   }
 
   void onClickSignIn() {
-    // Get.toNamed('/main_screen');
-
     if(selectedOption == 0){
       toastMassage('Please select any client');
       return;
@@ -91,17 +89,18 @@ class _LoginState extends State<Login> implements LoginView {
   void initState() {
     super.initState();
     _passwordVisible = true;
-
     userNameController.text = PreferenceData.getUserName();
-
-    // if (PreferenceData.getClientCode().isNotEmpty) {
-    //   if (PreferenceData.getClientCode() == 'MPFabTrad') {
-    //     selectedOption = 1;
-    //   } else {
-    //     selectedOption = 2;
-    //   }
-    // }
     initUniqueIdentifierState();
+
+    // Set system UI overlay style to match the blue background
+    SystemChrome.setSystemUIOverlayStyle(
+      SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.light,
+        systemNavigationBarColor: const Color(0xFF0D47A1), // Deep blue for navigation bar
+        systemNavigationBarIconBrightness: Brightness.light,
+      ),
+    );
   }
 
   initUniqueIdentifierState() async {
@@ -119,444 +118,318 @@ class _LoginState extends State<Login> implements LoginView {
     }
 
     if (!mounted) return '';
-
     print(deviceId);
   }
 
   @override
   Widget build(BuildContext context) {
-    Color getColor(Set<MaterialState> states) {
-      const Set<MaterialState> interactiveStates = <MaterialState>{
-        MaterialState.pressed,
-        MaterialState.hovered,
-        MaterialState.focused,
-      };
-      if (states.any(interactiveStates.contains)) {
-        return colorApp;
-      }
-      return colorApp;
-    }
+    // Define the deep blue color to match the screenshot
+    final deepBlueColor = const Color(0xFF0D47A1);
 
-    return Material(
-      child: SafeArea(
-        child: Scaffold(
-          backgroundColor: colorApp,
-          body: Column(
-            children: [
-              Expanded(
-                  child: SingleChildScrollView(
+    return Scaffold(
+      // Remove default safe area to allow color to extend to the top
+      extendBodyBehindAppBar: true,
+      extendBody: true,
+      backgroundColor: deepBlueColor,
+      body: Container(
+        // Make sure this container fills the entire screen
+        width: double.infinity,
+        height: double.infinity,
+        color: deepBlueColor,
+        child: SafeArea(
+          // Set bottom to false to extend color behind the bottom system navigation
+          bottom: false,
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                // Top Logo Section
+                Container(
+                  padding: const EdgeInsets.symmetric(vertical: 40),
+                  child: Column(
+                    children: [
+                      Hero(
+                        tag: 'app_logo',
+                        child: Container(
+                          padding: const EdgeInsets.all(18),
+                          decoration: const BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Image.asset(
+                            appIcon,
+                            height: 80,
+                            width: 80,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      Text(
+                        "Please enter login details to continue..",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 18,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Login Form Card
+                Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 20),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(24.0),
                     child: Column(
-                      mainAxisSize: MainAxisSize.max,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        SizedBox(
-                          height: MediaQuery.of(context).size.height * 0.35,
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
+                        Text(
+                          "Sign In",
+                          style: TextStyle(
+                            fontSize: 26,
+                            fontWeight: FontWeight.bold,
+                            color: deepBlueColor,
+                          ),
+                        ),
+                        const SizedBox(height: 25),
+
+                        // Username Field
+                        _buildInputField(
+                          controller: userNameController,
+                          label: "Username",
+                          icon: Icons.person_outline,
+                          deepBlueColor: deepBlueColor,
+                        ),
+                        const SizedBox(height: 20),
+
+                        // Password Field
+                        Visibility(
+                          visible: isUserVerify,
+                          child: _buildPasswordField(deepBlueColor),
+                        ),
+                        const SizedBox(height: 25),
+
+                        // Client Radio Buttons
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Colors.grey.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Row(
                             children: [
-                              Image.asset(
-                                appIcon,
-                                height: 135,
-                                width: 135,
+                              Expanded(
+                                child: _buildRadioOption(
+                                  title: "Aadhat",
+                                  value: 1,
+                                  icon: Icons.business,
+                                  deepBlueColor: deepBlueColor,
+                                ),
                               ),
-                              verticalViewBig(),
-                              Text(
-                                sWelcome,
-                                style: heading2(colorWhite),
+                              Container(
+                                height: 40,
+                                width: 1,
+                                color: Colors.grey.withOpacity(0.3),
                               ),
-                              verticalView(),
-                              Text(
-                                sWelcomeDesc,
-                                style: bodyText2(colorWhite),
+                              Expanded(
+                                child: _buildRadioOption(
+                                  title: "Agency",
+                                  value: 2,
+                                  icon: Icons.store,
+                                  deepBlueColor: deepBlueColor,
+                                ),
                               ),
                             ],
                           ),
                         ),
-                        Container(
-                          height: MediaQuery.of(context).size.height * 0.65,
-                          decoration: const BoxDecoration(
-                              color: colorWhite, borderRadius: BorderRadius.only(topLeft: Radius.circular(100))),
-                          child: Padding(
-                            padding: const EdgeInsets.only(left: 20, right: 20),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const SizedBox(
-                                  height: 80,
-                                ),
-                                TextField(
-                                  //focusNode: myFocusNode,
-                                  enabled: true,
-                                  obscureText: false,
-                                  textAlign: TextAlign.left,
-                                  controller: userNameController,
-                                  autofocus: false,
-                                  onChanged: (text) {},
-                                  style: blackTitle(),
-                                  decoration: InputDecoration(
-                                    // border: InputBorder.none,
-                                    /*focusedBorder: const OutlineInputBorder(
-                                borderSide: const BorderSide(color: Colors.green, width: 5.0),
-                                 ),*/
-                                    labelStyle: heading1(colorApp),
-                                    labelText: sUserName,
-                                    hintText: sUserName,
-                                    hintStyle: heading1(colorGray),
-                                    contentPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
-                                    //isDense: true,
-                                  ),
-                                ),
-                                verticalViewBig(),
-                                Visibility(
-                                  visible: isUserVerify,
-                                  child: Stack(
-                                    children: [
-                                      TextField(
-                                        //focusNode: myFocusNode,
-                                        obscureText: _passwordVisible,
-                                        textAlign: TextAlign.left,
-                                        controller: passwordController,
-                                        autofocus: false,
-                                        onChanged: (text) {},
-                                        style: heading2(colorText),
-                                        decoration: InputDecoration(
-                                          // border: InputBorder.none,
-                                          /*focusedBorder: const OutlineInputBorder(
-                                        borderSide: const BorderSide(color: Colors.green, width: 5.0),
-                                        ),*/
-                                          labelStyle: heading1(colorApp),
-                                          labelText: sPassword,
-                                          hintText: sPassword,
-                                          hintStyle: heading1(colorGray),
-                                          contentPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
-                                          //isDense: true,
-                                        ),
-                                      ),
-                                      Positioned(
-                                        right: 0,
-                                        top: 10,
-                                        child: InkWell(
-                                          onTap: (() {
-                                            setState(() {
-                                              _passwordVisible = !_passwordVisible;
-                                            });
-                                          }),
-                                          child: Icon(
-                                            // Based on passwordVisible state choose the icon
-                                            _passwordVisible ? Icons.visibility : Icons.visibility_off,
-                                            color: colorBlack,
-                                          ),
-                                        ),
-                                      ),
-                                      //const SizedBox(width: 5)
-                                    ],
-                                  ),
-                                ),
-                                verticalViewBig(),
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: ListTile(
-                                        dense: true,
-                                        contentPadding: EdgeInsets.only(left: 0.0, right: 0.0),
-                                        visualDensity: VisualDensity(horizontal: -4, vertical: 0),
-                                        title: Text(
-                                          'Adhat',
-                                          style: blackTitle(),
-                                        ),
-                                        leading: Radio(
-                                          value: 1,
-                                          groupValue: selectedOption,
-                                          activeColor: colorApp,
-                                          // Change the active radio button color here
-                                          fillColor: MaterialStateProperty.all(colorApp),
-                                          // Change the fill color when selected
-                                          splashRadius: 25,
-                                          // Change the splash radius when clicked
-                                          onChanged: (value) {
-                                            setState(() {
-                                              selectedOption = value!;
-                                            });
-                                          },
-                                        ),
-                                      ),
-                                    ),
-                                    Expanded(
-                                      child: ListTile(
-                                        dense: true,
-                                        contentPadding: EdgeInsets.only(left: 0.0, right: 0.0),
-                                        visualDensity: VisualDensity(horizontal: -4, vertical: 0),
-                                        title: Text(
-                                          'Agency',
-                                          style: blackTitle(),
-                                        ),
-                                        leading: Radio(
-                                          value: 2,
-                                          groupValue: selectedOption,
-                                          activeColor: colorApp,
-                                          // Change the active radio button color here
-                                          fillColor: MaterialStateProperty.all(colorApp),
-                                          // Change the fill color when selected
-                                          splashRadius: 25,
-                                          // Change the splash radius when clicked
-                                          onChanged: (value) {
-                                            setState(() {
-                                              selectedOption = value!;
-                                            });
-                                          },
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                // TextField(
-                                //   //focusNode: myFocusNode,
-                                //   enabled: true,
-                                //   obscureText: false,
-                                //   textAlign: TextAlign.left,
-                                //   controller: clientCodeController,
-                                //   autofocus: false,
-                                //   onChanged: (text) {},
-                                //   style: blackTitle(),
-                                //   decoration: InputDecoration(
-                                //     // border: InputBorder.none,
-                                //     /*focusedBorder: const OutlineInputBorder(
-                                //     borderSide: const BorderSide(color: Colors.green, width: 5.0),
-                                //      ),*/
-                                //     labelStyle: heading1(colorApp),
-                                //     labelText: sClientCode,
-                                //     hintText: sClientCode,
-                                //     hintStyle: heading1(colorGray),
-                                //     contentPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
-                                //     //isDense: true,
-                                //   ),
-                                // ),
+                        const SizedBox(height: 20),
 
-                                verticalView(),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  children: [
-                                    Expanded(
-                                      child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.start,
-                                        children: [
-                                          Checkbox(
-                                            checkColor: Colors.white,
-                                            fillColor: MaterialStateProperty.resolveWith(getColor),
-                                            value: isChecked,
-                                            onChanged: (bool? value) {
-                                              setState(() {
-                                                isChecked = value!;
-                                              });
-                                            },
-                                          ),
-                                          Text(
-                                            sRememberMe,
-                                            style: heading1(colorSecondary),
-                                          ),
-                                        ],
-                                      ),
+                        // Remember Me & Forgot Password
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              children: [
+                                SizedBox(
+                                  height: 24,
+                                  width: 24,
+                                  child: Checkbox(
+                                    value: isChecked,
+                                    activeColor: deepBlueColor,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(4),
                                     ),
-                                    InkWell(
-                                      onTap: (() {
-                                        // Get.toNamed('/service_request_plc');
-                                      }),
-                                      child: Text(
-                                        '$sForgotPassword ?',
-                                        style: const TextStyle(
-                                            decoration: TextDecoration.underline,
-                                            fontSize: 14,
-                                            fontFamily: "Medium",
-                                            color: colorSecondary),
-                                      ),
-                                    ),
-                                  ],
+                                    onChanged: (bool? value) {
+                                      setState(() {
+                                        isChecked = value!;
+                                      });
+                                    },
+                                  ),
                                 ),
-                                verticalView(),
-                                InkWell(
-                                    onTap: (() {
-                                      onClickSignIn();
-                                    }),
-                                    child: btnHalf(context, sLogin)),
-                                verticalViewBig(),
+                                const SizedBox(width: 8),
+                                Text(
+                                  "Remember Me",
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.grey[700],
+                                  ),
+                                ),
                               ],
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                // Forgot password action
+                              },
+                              child: Text(
+                                "Forgot Password",
+                                style: TextStyle(
+                                  color: deepBlueColor,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 25),
+
+                        // Login Button
+                        SizedBox(
+                          width: double.infinity,
+                          height: 50,
+                          child: ElevatedButton(
+                            onPressed: onClickSignIn,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: deepBlueColor,
+                              foregroundColor: Colors.white,
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            child: Text(
+                              "Login",
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
                         ),
                       ],
                     ),
-                  ))
+                  ),
+                ),
 
-              // Expanded(
-              //   child: Stack(
-              //     children: [
-              //       Container(
-              //         height: MediaQuery.of(context).size.height * 0.4,
-              //         decoration: BoxDecoration(
-              //             color: colorApp,
-              //             border: Border.all(color: colorApp),
-              //             borderRadius: const BorderRadius.only(
-              //                 bottomRight: Radius.circular(8),
-              //                 bottomLeft: Radius.circular(8))),
-              //       ),
-              //       SingleChildScrollView(
-              //           child: Column(
-              //         children: [
-              //           SizedBox(
-              //             height: MediaQuery.of(context).size.height * 0.3,
-              //           ),
-              //           Card(
-              //             margin: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-              //             elevation: 2,
-              //             shape: const RoundedRectangleBorder(
-              //               borderRadius: BorderRadius.all(Radius.circular(10)),
-              //             ),
-              //             child: Padding(
-              //               padding: const EdgeInsets.fromLTRB(25, 10, 25, 10),
-              //               child: Column(
-              //                 crossAxisAlignment: CrossAxisAlignment.stretch,
-              //                 children: [
-              //                   verticalViewBig(),
-              //                   Center(
-              //                     child: Text(
-              //                       sLogin.toUpperCase(),
-              //                       style: const TextStyle(
-              //                           fontSize: 20,
-              //                           fontFamily: "Medium",
-              //                           color: colorApp),
-              //                     ),
-              //                   ),
-              //                   verticalViewBig(),
-              //                   textField(context, userNameController,
-              //                       sUserName, '', false,true),
-              //                   verticalView(),
-              //                   textField(context, clientCodeController,
-              //                       sClientCode, '', false,true),
-              //                   verticalView(),
-              //                   /*textField(
-              //                       context,
-              //                       passwordController,
-              //                       '',
-              //                       icPassword,
-              //                       false,
-              //                     ),*/
-              //
-              //                   Visibility(
-              //                     visible: isUserVerify,
-              //                     child: Container(
-              //                       decoration: BoxDecoration(
-              //                           color: colorOffWhite,
-              //                           border: Border.all(color: colorGray),
-              //                           borderRadius: const BorderRadius.all(
-              //                             Radius.circular(5),
-              //                           )),
-              //                       child: Padding(
-              //                         padding: const EdgeInsets.only(
-              //                             left: 10, right: 10),
-              //                         child: Row(
-              //                           children: [
-              //                             Expanded(
-              //                               child: TextField(
-              //                                 //focusNode: myFocusNode,
-              //                                 obscureText: _passwordVisible,
-              //                                 textAlign: TextAlign.left,
-              //                                 controller: passwordController,
-              //                                 autofocus: false,
-              //                                 onChanged: (text) {},
-              //                                 style: heading2(colorText),
-              //                                 decoration: InputDecoration(
-              //                                   border: InputBorder.none,
-              //                                   hintText: sPassword,
-              //                                   hintStyle: heading1(colorGray),
-              //                                   contentPadding:
-              //                                       EdgeInsets.symmetric(
-              //                                           horizontal: 0,
-              //                                           vertical: 0),
-              //                                   //isDense: true,
-              //                                 ),
-              //                               ),
-              //                             ),
-              //                             InkWell(
-              //                               onTap: (() {
-              //                                 setState(() {
-              //                                   _passwordVisible =
-              //                                       !_passwordVisible;
-              //                                 });
-              //                               }),
-              //                               child: Icon(
-              //                                 // Based on passwordVisible state choose the icon
-              //                                 _passwordVisible
-              //                                     ? Icons.visibility
-              //                                     : Icons.visibility_off,
-              //                                 color: colorBlack,
-              //                               ),
-              //                             ),
-              //                             const SizedBox(width: 5)
-              //                           ],
-              //                         ),
-              //                       ),
-              //                     ),
-              //                   ),
-              //                   verticalView(),
-              //                   Row(
-              //                     mainAxisAlignment: MainAxisAlignment.start,
-              //                     children: [
-              //                       Expanded(
-              //                         child: Row(
-              //                           mainAxisAlignment:
-              //                               MainAxisAlignment.start,
-              //                           children: [
-              //                             Checkbox(
-              //                               checkColor: Colors.white,
-              //                               fillColor: MaterialStateProperty
-              //                                   .resolveWith(getColor),
-              //                               value: isChecked,
-              //                               onChanged: (bool? value) {
-              //                                 setState(() {
-              //                                   isChecked = value!;
-              //                                 });
-              //                               },
-              //                             ),
-              //                             Text(
-              //                               sRememberMe,
-              //                               style: heading1(colorSecondary),
-              //                             ),
-              //                           ],
-              //                         ),
-              //                       ),
-              //                       InkWell(
-              //                         onTap: (() {
-              //                           // Get.toNamed('/service_request_plc');
-              //                         }),
-              //                         child: Text(
-              //                           '$sForgotPassword ?',
-              //                           style: const TextStyle(
-              //                               decoration:
-              //                                   TextDecoration.underline,
-              //                               fontSize: 14,
-              //                               fontFamily: "Medium",
-              //                               color: colorSecondary),
-              //                         ),
-              //                       ),
-              //                     ],
-              //                   ),
-              //                   verticalView(),
-              //                   InkWell(
-              //                       onTap: (() {
-              //                         onClickSignIn();
-              //                       }),
-              //                       child: btnHalf(context, sLogin)),
-              //                   verticalViewBig(),
-              //                 ],
-              //               ),
-              //             ),
-              //           ),
-              //         ],
-              //       )),
-              //     ],
-              //   ),
-              // ),
-            ],
+                // Add extra space at the bottom to ensure the blue color extends
+                const SizedBox(height: 100),
+              ],
+            ),
           ),
+        ),
+      ),
+    );
+  }
+
+  // Custom input field builder
+  Widget _buildInputField({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+    required Color deepBlueColor,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.grey.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: TextField(
+        controller: controller,
+        style: TextStyle(fontSize: 16),
+        decoration: InputDecoration(
+          contentPadding: const EdgeInsets.symmetric(vertical: 16),
+          border: InputBorder.none,
+          hintText: label,
+          hintStyle: TextStyle(color: Colors.grey),
+          prefixIcon: Icon(icon, color: deepBlueColor),
+        ),
+      ),
+    );
+  }
+
+  // Password field with visibility toggle
+  Widget _buildPasswordField(Color deepBlueColor) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.grey.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: TextField(
+        controller: passwordController,
+        obscureText: _passwordVisible,
+        style: TextStyle(fontSize: 16),
+        decoration: InputDecoration(
+          contentPadding: const EdgeInsets.symmetric(vertical: 16),
+          border: InputBorder.none,
+          hintText: "Password",
+          hintStyle: TextStyle(color: Colors.grey),
+          prefixIcon: Icon(Icons.lock_outline, color: deepBlueColor),
+          suffixIcon: IconButton(
+            icon: Icon(
+              _passwordVisible ? Icons.visibility_off : Icons.visibility,
+              color: Colors.grey,
+            ),
+            onPressed: () {
+              setState(() {
+                _passwordVisible = !_passwordVisible;
+              });
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Radio option builder
+  Widget _buildRadioOption({
+    required String title,
+    required int value,
+    required IconData icon,
+    required Color deepBlueColor,
+  }) {
+    return InkWell(
+      onTap: () {
+        setState(() {
+          selectedOption = value;
+        });
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+        child: Row(
+          children: [
+            Icon(icon, color: deepBlueColor, size: 20),
+            const SizedBox(width: 6),
+            Text(
+              title,
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            Spacer(),
+            Radio(
+              value: value,
+              groupValue: selectedOption,
+              activeColor: deepBlueColor,
+              onChanged: (int? newValue) {
+                setState(() {
+                  selectedOption = newValue!;
+                });
+              },
+            ),
+          ],
         ),
       ),
     );
@@ -601,8 +474,7 @@ class _LoginState extends State<Login> implements LoginView {
   @override
   void onError(int errorCode) {
     if (errorCode == 401) {
-      //Utils.howMyDialogNew(context, loginAlert);
-      toastMassage('invalid credentials');
+      toastMassage('Invalid credentials');
     } else {
       CheckResponseCode.getResponseCode(errorCode, context);
     }
