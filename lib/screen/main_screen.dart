@@ -37,6 +37,7 @@ import '../model/dashboard_filter_response.dart';
 import '../model/login_response.dart';
 import '../model/version_update_response.dart';
 import '../utils/color.dart';
+import '../utils/dialog/client_login_dialog.dart';
 import '../utils/images.dart';
 import '../utils/preference.dart';
 import '../utils/string.dart';
@@ -72,6 +73,11 @@ class _MainScreenState extends State<MainScreen> implements MainView {
   List<FilterData> companyList = [];
   FilterData? selectedCompany;
 
+  List<ExtraClient>? extraClients;
+  ExtraClient? currentExtraClient;
+
+  String appVersionInfo = '';
+
   _MainScreenState() {
     _presenter = MainPresenter(this);
   }
@@ -84,10 +90,6 @@ class _MainScreenState extends State<MainScreen> implements MainView {
 
     selectedCompany = FilterData();
     _presenter!.getAppInitialAPI();
-    // _presenter!.getCompany();
-    // _presenter!.getAllMenu();
-    // _presenter!.getDrawerMenu();
-    // _presenter!.checkVersionUpdate();
 
     try {
       selectedCompany!.id = userData!.value!.companyId;
@@ -98,27 +100,9 @@ class _MainScreenState extends State<MainScreen> implements MainView {
 
     // scheduleIconSwitchIfNeeded();
     permission();
-  }
 
-  // Future<void> scheduleIconSwitchIfNeeded() async {
-  //   final prefs = await SharedPreferences.getInstance();
-  //   final count = prefs.getInt('launchCount') ?? 0;
-  //
-  //   // Toggle on each launch
-  //   final switchToAlias2 = (count % 2 == 1); // 1st → false, 2nd → true, etc.
-  //
-  //   const platform = MethodChannel('icon_switcher');
-  //   await platform.invokeMethod('scheduleSwitch', {
-  //     "enable": switchToAlias2
-  //         ? "com.mrtex.fab.MainActivityAlias2"
-  //         : "com.mrtex.fab.MainActivityAlias1",
-  //     "disable": switchToAlias2
-  //         ? "com.mrtex.fab.MainActivityAlias1"
-  //         : "com.mrtex.fab.MainActivityAlias2",
-  //   });
-  //
-  //   prefs.setInt('launchCount', count + 1);
-  // }
+    _getAppVersionInfo();
+  }
 
   permission() async {
     // You can request multiple permissions at once.
@@ -127,6 +111,44 @@ class _MainScreenState extends State<MainScreen> implements MainView {
     ].request();
 
     print('Permission - ${statuses[Permission.storage]}');
+  }
+
+  Future<void> _getAppVersionInfo() async {
+    try {
+      PackageInfo packageInfo = await PackageInfo.fromPlatform();
+      setState(() {
+        appVersionInfo = '${packageInfo.version} (${packageInfo.buildNumber})';
+      });
+    } catch (e) {
+      print('Error getting app version: $e');
+      setState(() {
+        appVersionInfo = '1.0.0'; // Fallback version
+      });
+    }
+  }
+
+  void _loadSavedClient() {
+    if (extraClients != null && extraClients!.isNotEmpty) {
+      // Get saved client ID from preferences
+      String savedClientId = PreferenceData.getCurrentClientId();
+
+      if (savedClientId.isNotEmpty) {
+        // Find the client with the saved ID
+        for (var client in extraClients!) {
+          if (client.clientId.toString() == savedClientId) {
+            setState(() {
+              currentExtraClient = client;
+            });
+            return;
+          }
+        }
+      }
+
+      // If no saved client found or ID doesn't match any client, set the first client as default
+      setState(() {
+        currentExtraClient = extraClients![0];
+      });
+    }
   }
 
   @override
@@ -319,6 +341,16 @@ class _MainScreenState extends State<MainScreen> implements MainView {
                 ),
               ),
             ),
+            verticalViewSmall(),
+            Text(
+              'Developed by : Techno Desk Software',
+              style: bodyText1(colorGray),
+            ),
+            Text(
+              'App Version: $appVersionInfo',
+              style: bodyText1(colorGray),
+            ),
+            verticalViewSmall(),
             divider(),
             InkWell(
               onTap: (() {
@@ -358,6 +390,527 @@ class _MainScreenState extends State<MainScreen> implements MainView {
         ),
       ),
     );
+  }
+
+  Widget _buildExtraClientsSection() {
+    // Get the active client name to display
+    // String activeClientName = currentExtraClient?.clientName ??
+    //     (extraClients != null && extraClients!.isNotEmpty
+    //         ? extraClients![0].clientName ?? 'Select Client'
+    //         : 'Select Client');
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: colorWhite, //Color(0xfff8f8f8),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: colorOffWhite,
+          width: 1,
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+        child: Row(
+          children: [
+            for (int i = 0; i < extraClients!.length; i++)
+              Expanded(
+                child: _buildClientCard(extraClients![i], i == 0),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildClientCard(ExtraClient client, bool isFirstItem) {
+    final bool isActive = currentExtraClient?.clientId == client.clientId;
+
+    // If currentExtraClient is null, make the first client active by default
+    if (currentExtraClient == null && isFirstItem) {
+      // You might want to set this client as active in your state
+      // This could be done in initState or when loading clients
+      // setState(() {
+      //   currentExtraClient = client;
+      // });
+    }
+
+    return Container(
+      margin: EdgeInsets.only(left: isFirstItem ? 0 : 3, right: isFirstItem ? 3 : 0, top: 8, bottom: 8),
+      decoration: BoxDecoration(
+        color: isActive ? colorApp.withOpacity(0.1) : Color(0xfff8f8f8),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(
+          color: isActive ? colorApp : Colors.transparent,
+          width: 1,
+        ),
+      ),
+      child: InkWell(
+        onTap: () {
+          // Don't show confirmation if this is already the active client
+          if (!isActive) {
+            _showClientSwitchConfirmation(client);
+          }
+        },
+        borderRadius: BorderRadius.circular(10),
+        child: Padding(
+          padding: const EdgeInsets.all(10),
+          child: Row(
+            children: [
+              Stack(
+                alignment: Alignment.bottomRight,
+                children: [
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: colorWhite,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 2,
+                          offset: const Offset(0, 1),
+                        ),
+                      ],
+                    ),
+                    child: client.clientLogo != null && client.clientLogo!.isNotEmpty
+                        ? ClipOval(
+                            child: FadeInImage.assetNetwork(
+                              placeholder: appIcon,
+                              image: client.clientLogo!,
+                              fit: BoxFit.cover,
+                              imageErrorBuilder: (context, error, stackTrace) {
+                                return Icon(Icons.business, color: colorApp, size: 20);
+                              },
+                            ),
+                          )
+                        : Icon(Icons.business, color: colorApp, size: 20),
+                  ),
+                  if (isActive)
+                    Container(
+                      padding: const EdgeInsets.all(1),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: colorApp, width: 1),
+                      ),
+                      child: Icon(Icons.check_circle, color: colorApp, size: 10),
+                    ),
+                ],
+              ),
+
+              horizontalView(),
+              horizontalViewSmall(),
+
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    client.clientName ?? 'Unknown Client',
+                    //textAlign: TextAlign.center,
+                    style: heading1(isActive ? colorApp : colorBlack),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  //verticalViewSmall(),
+                  Text(
+                    client.companyName ?? '',
+                    textAlign: TextAlign.center,
+                    style: bodyText3(colorText.withOpacity(0.7)),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+
+              //verticalView(),
+              // Container(
+              //   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              //   decoration: BoxDecoration(
+              //     color: isActive ? colorApp : Colors.grey.withOpacity(0.2),
+              //     borderRadius: BorderRadius.circular(20),
+              //   ),
+              //   child: Row(
+              //     mainAxisSize: MainAxisSize.min,
+              //     children: [
+              //       Icon(
+              //         isActive ? Icons.check_circle : Icons.login,
+              //         size: 16,
+              //         color: isActive ? colorWhite : colorText,
+              //       ),
+              //       const SizedBox(width: 6),
+              //       Text(
+              //         isActive ? 'Active' : 'Switch',
+              //         style: bodyText2(isActive ? colorWhite : colorText),
+              //       ),
+              //     ],
+              //   ),
+              // ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Widget _buildExtraClientsSection() {
+  //   // Get the active client name to display
+  //   String activeClientName = currentExtraClient?.clientName ??
+  //       (extraClients != null && extraClients!.isNotEmpty
+  //           ? extraClients![0].clientName ?? 'Select Client'
+  //           : 'Select Client');
+  //
+  //   return Container(
+  //     margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+  //     decoration: BoxDecoration(
+  //       color: Color(0xfff8f8f8),
+  //       borderRadius: BorderRadius.circular(12),
+  //       border: Border.all(
+  //         color: colorOffWhite,
+  //         width: 1,
+  //       ),
+  //     ),
+  //     child: Theme(
+  //       // Remove the default ExpansionTile divider
+  //       data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+  //       child: ExpansionTile(
+  //         initiallyExpanded: false,
+  //         tilePadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 1),
+  //         childrenPadding: const EdgeInsets.only(bottom: 10),
+  //         leading: Icon(Icons.business_center, color: colorApp, size: 22),
+  //         title: Text(
+  //           activeClientName,
+  //           style: heading2(colorApp),
+  //         ),
+  //         subtitle: Text(
+  //           'Tap to switch client',
+  //           style: bodyText1(colorText.withOpacity(0.7)),
+  //         ),
+  //         trailing: Container(
+  //           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+  //           decoration: BoxDecoration(
+  //             color: colorApp.withOpacity(0.1),
+  //             borderRadius: BorderRadius.circular(12),
+  //           ),
+  //           child: Row(
+  //             mainAxisSize: MainAxisSize.min,
+  //             children: [
+  //               Icon(Icons.swap_horiz, size: 16, color: colorApp),
+  //               const SizedBox(width: 4),
+  //               Text(
+  //                 'Switch',
+  //                 style: bodyText2(colorApp),
+  //               ),
+  //             ],
+  //           ),
+  //         ),
+  //         children: [
+  //           //const Divider(height: 1, thickness: 1, indent: 16, endIndent: 16),
+  //           divider(),
+  //           const SizedBox(height: 12),
+  //           Padding(
+  //             padding: const EdgeInsets.symmetric(horizontal: 12),
+  //             child: Row(
+  //               children: [
+  //                 for (int i = 0; i < extraClients!.length; i++)
+  //                   Expanded(
+  //                     child: _buildClientCard(extraClients![i], i == 0),
+  //                   ),
+  //               ],
+  //             ),
+  //           ),
+  //         ],
+  //       ),
+  //     ),
+  //   );
+  // }
+  //
+  // Widget _buildClientCard(ExtraClient client, bool isFirstItem) {
+  //   final bool isActive = currentExtraClient?.clientId == client.clientId;
+  //
+  //   // If currentExtraClient is null, make the first client active by default
+  //   if (currentExtraClient == null && isFirstItem) {
+  //     // You might want to set this client as active in your state
+  //     // This could be done in initState or when loading clients
+  //     // setState(() {
+  //     //   currentExtraClient = client;
+  //     // });
+  //   }
+  //
+  //   return Container(
+  //     margin: EdgeInsets.only(left: isFirstItem ? 0 : 6, right: isFirstItem ? 6 : 0),
+  //     decoration: BoxDecoration(
+  //       color: isActive ? colorApp.withOpacity(0.1) : colorWhite,
+  //       borderRadius: BorderRadius.circular(10),
+  //       border: Border.all(
+  //         color: isActive ? colorApp : Colors.transparent,
+  //         width: 1,
+  //       ),
+  //     ),
+  //     child: InkWell(
+  //       onTap: () => _handleClientSelection(client),
+  //       borderRadius: BorderRadius.circular(10),
+  //       child: Padding(
+  //         padding: const EdgeInsets.all(12),
+  //         child: Column(
+  //           children: [
+  //             Stack(
+  //               alignment: Alignment.bottomRight,
+  //               children: [
+  //                 Container(
+  //                   width: 50,
+  //                   height: 50,
+  //                   decoration: BoxDecoration(
+  //                     color: colorWhite,
+  //                     shape: BoxShape.circle,
+  //                     boxShadow: [
+  //                       BoxShadow(
+  //                         color: Colors.black.withOpacity(0.1),
+  //                         blurRadius: 4,
+  //                         offset: const Offset(0, 2),
+  //                       ),
+  //                     ],
+  //                   ),
+  //                   child: client.clientLogo != null && client.clientLogo!.isNotEmpty
+  //                       ? ClipOval(
+  //                           child: FadeInImage.assetNetwork(
+  //                             placeholder: appIcon,
+  //                             image: client.clientLogo!,
+  //                             fit: BoxFit.cover,
+  //                             imageErrorBuilder: (context, error, stackTrace) {
+  //                               return Icon(Icons.business, color: colorApp, size: 30);
+  //                             },
+  //                           ),
+  //                         )
+  //                       : Icon(Icons.business, color: colorApp, size: 30),
+  //                 ),
+  //                 if (isActive)
+  //                   Container(
+  //                     padding: const EdgeInsets.all(2),
+  //                     decoration: BoxDecoration(
+  //                       color: Colors.white,
+  //                       shape: BoxShape.circle,
+  //                       border: Border.all(color: colorApp, width: 1.5),
+  //                     ),
+  //                     child: Icon(Icons.check_circle, color: colorApp, size: 14),
+  //                   ),
+  //               ],
+  //             ),
+  //             verticalView(),
+  //             Text(
+  //               client.clientName ?? 'Unknown Client',
+  //               textAlign: TextAlign.center,
+  //               style: bodyText1(colorBlack),
+  //               maxLines: 1,
+  //               overflow: TextOverflow.ellipsis,
+  //             ),
+  //             verticalViewSmall(),
+  //             Text(
+  //               client.companyName ?? '',
+  //               textAlign: TextAlign.center,
+  //               style: bodyText3(colorText.withOpacity(0.7)),
+  //               maxLines: 1,
+  //               overflow: TextOverflow.ellipsis,
+  //             ),
+  //             verticalView(),
+  //             Container(
+  //               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+  //               decoration: BoxDecoration(
+  //                 color: isActive ? colorApp : Colors.grey.withOpacity(0.2),
+  //                 borderRadius: BorderRadius.circular(20),
+  //               ),
+  //               child: Row(
+  //                 mainAxisSize: MainAxisSize.min,
+  //                 children: [
+  //                   Icon(
+  //                     isActive ? Icons.check_circle : Icons.login,
+  //                     size: 16,
+  //                     color: isActive ? colorWhite : colorText,
+  //                   ),
+  //                   const SizedBox(width: 6),
+  //                   Text(
+  //                     isActive ? 'Active' : 'Switch',
+  //                     style: bodyText2(isActive ? colorWhite : colorText),
+  //                   ),
+  //                 ],
+  //               ),
+  //             ),
+  //           ],
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
+
+  // Handle client selection logic
+
+  // Show confirmation dialog before switching clients
+  void _showClientSwitchConfirmation(ExtraClient client) {
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: colorOffWhite,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+          title: Row(
+            children: [
+              Icon(Icons.swap_horiz, color: colorApp),
+              const SizedBox(width: 10),
+              Text(
+                "Switch Client",
+                style: TextStyle(fontSize: 18, color: colorBlack, fontFamily: "Medium"),
+              ),
+            ],
+          ),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text(
+                  'Are you sure you want to switch to ${client.clientName}?',
+                  style: bodyText1(colorText),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  'Your current session will be closed.',
+                  style: bodyText2(colorText.withOpacity(0.7)),
+                ),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text(
+                "CANCEL",
+                style: heading2(colorGray),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text(
+                "SWITCH",
+                style: heading2(colorApp),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop();
+                _handleClientSelection(client);
+              },
+            )
+          ],
+        );
+      },
+    );
+  }
+
+// Handle client selection logic
+  void _handleClientSelection(ExtraClient client) async {
+    // Close the drawer if it's open
+    if (Navigator.canPop(context)) {
+      Navigator.pop(context);
+    }
+
+    if (client.token == null || client.token!.isEmpty) {
+      // Show login dialog if token is empty
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return ClientLoginDialog(
+            client: client,
+            onLoginSuccess: (String token) {
+              // Update client with the new token
+              client.token = token;
+
+              // Clear previous client data
+              PreferenceData.setCurrentClientId('');
+              PreferenceData.setCurrentClientName('');
+
+              // Switch to this client
+              _switchToClient(client);
+            },
+          );
+        },
+      );
+    } else {
+      // Token exists, switch to this client directly
+      _switchToClient(client);
+    }
+  }
+
+  // Switch to the selected client
+  void _switchToClient(ExtraClient client) async {
+    // Show loading indicator
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          child: Center(
+            child: Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const CircularProgressIndicator(color: colorApp),
+                  const SizedBox(height: 16),
+                  Text('Switching to ${client.clientName}...', style: bodyText1(colorBlack)),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+
+    try {
+      PreferenceData.setToken(client.token!);
+
+      if (PreferenceData.getCurrentClientId() != client.clientId.toString() &&
+          PreferenceData.getCurrentClientName() != client.clientName) {
+        PreferenceData.setCurrentClientId(client.clientId.toString());
+        PreferenceData.setCurrentClientName(client.clientName ?? '');
+
+        // Update current client
+        setState(() {
+          currentExtraClient = client;
+        });
+
+        _presenter!.getAppInitialAPI();
+
+        // Show success message
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Successfully switched to ${client.clientName}'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+
+      // Close loading dialog
+      Navigator.pop(context);
+    } catch (e) {
+      // Close loading dialog
+      Navigator.pop(context);
+
+      // Show error message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to switch client: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   Widget drawerListCell(MenuData menu, int index) {
@@ -583,34 +1136,8 @@ class _MainScreenState extends State<MainScreen> implements MainView {
           children: [
             // Top section with banner or user profile
             bannerList.isNotEmpty ? topBanner() : modernTopWidget(),
-
-            // Welcome section with last sync info
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 20, 16, 5),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Welcome, ${userData!.value!.firstName!}',
-                    style: heading1(colorApp),
-                  ),
-                  const SizedBox(height: 5),
-                  Visibility(
-                    visible: lastUpdate.isNotEmpty,
-                    child: Row(
-                      children: [
-                        Icon(Icons.sync, size: 14, color: colorText.withOpacity(0.7)),
-                        const SizedBox(width: 5),
-                        Text(
-                          'Last Sync: $lastUpdate',
-                          style: bodyText2(colorText.withOpacity(0.7)),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            verticalViewSmall(),
+            if (extraClients != null && extraClients!.isNotEmpty) _buildExtraClientsSection(),
 
             // Quick actions section
             Padding(
@@ -623,66 +1150,7 @@ class _MainScreenState extends State<MainScreen> implements MainView {
 
             // Modern menu grid
             modernDashboardGridWidget(),
-
-            // Additional info section (if needed)
-            // Padding(
-            //   padding: const EdgeInsets.all(16.0),
-            //   child: Container(
-            //     width: double.infinity,
-            //     decoration: BoxDecoration(
-            //       color: colorWhite,
-            //       borderRadius: BorderRadius.circular(12),
-            //       boxShadow: [
-            //         BoxShadow(
-            //           color: Colors.black.withOpacity(0.05),
-            //           blurRadius: 10,
-            //           offset: const Offset(0, 2),
-            //         ),
-            //       ],
-            //     ),
-            //     child: Padding(
-            //       padding: const EdgeInsets.all(16.0),
-            //       child: Column(
-            //         crossAxisAlignment: CrossAxisAlignment.start,
-            //         children: [
-            //           Row(
-            //             children: [
-            //               Icon(Icons.business, color: colorApp),
-            //               const SizedBox(width: 10),
-            //               Text(
-            //                 'Company Information',
-            //                 style: heading2(colorBlack),
-            //               ),
-            //             ],
-            //           ),
-            //           const SizedBox(height: 10),
-            //           Text(
-            //             selectedCompany?.name ?? 'No company selected',
-            //             style: bodyText1(colorText),
-            //           ),
-            //           const SizedBox(height: 15),
-            //           InkWell(
-            //             onTap: () {
-            //               _presenter!.getCompany();
-            //             },
-            //             child: Container(
-            //               padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-            //               decoration: BoxDecoration(
-            //                 color: colorApp.withOpacity(0.1),
-            //                 borderRadius: BorderRadius.circular(20),
-            //                 border: Border.all(color: colorApp, width: 1),
-            //               ),
-            //               child: Text(
-            //                 'Change Company',
-            //                 style: bodyText2(colorApp),
-            //               ),
-            //             ),
-            //           ),
-            //         ],
-            //       ),
-            //     ),
-            //   ),
-            // ),
+            verticalView()
           ],
         ),
       ),
@@ -715,8 +1183,8 @@ class _MainScreenState extends State<MainScreen> implements MainView {
         child: Row(
           children: [
             Container(
-              height: 80,
-              width: 80,
+              height: 70,
+              width: 70,
               decoration: BoxDecoration(
                 color: Colors.white,
                 shape: BoxShape.circle,
@@ -731,13 +1199,13 @@ class _MainScreenState extends State<MainScreen> implements MainView {
               child: ClipOval(
                 child: userData!.value!.clientLogo!.isNotEmpty
                     ? FadeInImage.assetNetwork(
-                  placeholder: appIcon,
-                  image: userData!.value!.clientLogo!,
-                  fit: BoxFit.cover,
-                  imageErrorBuilder: (context, error, stackTrace) {
-                    return Image.asset(appIcon);
-                  },
-                )
+                        placeholder: appIcon,
+                        image: userData!.value!.clientLogo!,
+                        fit: BoxFit.cover,
+                        imageErrorBuilder: (context, error, stackTrace) {
+                          return Image.asset(appIcon);
+                        },
+                      )
                     : Image.asset(appIcon),
               ),
             ),
@@ -748,15 +1216,29 @@ class _MainScreenState extends State<MainScreen> implements MainView {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    userData!.value!.firstName!,
+                    'Welcome, ${userData!.value!.firstName!} (${userData!.value!.roleName!})',
                     style: heading1(colorWhite),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 5),
-                  Text(
-                    userData!.value!.roleName!,
-                    style: bodyText2(colorWhite.withOpacity(0.9)),
+                  // Text(
+                  //   userData!.value!.roleName!,
+                  //   style: bodyText2(colorWhite.withOpacity(0.9)),
+                  // ),
+
+                  Visibility(
+                    visible: lastUpdate.isNotEmpty,
+                    child: Row(
+                      children: [
+                        Icon(Icons.sync, size: 14, color: colorWhite.withOpacity(0.8)),
+                        const SizedBox(width: 5),
+                        Text(
+                          'Last Sync: $lastUpdate',
+                          style: bodyText1(colorWhite.withOpacity(0.8)),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -1733,6 +2215,9 @@ class _MainScreenState extends State<MainScreen> implements MainView {
       setState(() {
         selectedCompany!.name = compName;
         selectedCompany!.id = int.parse(compId.isEmpty ? "0" : compId);
+
+        PreferenceData.setSelectedCompanyId(int.parse(compId.isEmpty ? '0' : compId));
+        PreferenceData.setSelectedCompanyName(compName);
       });
     }
   }
@@ -1752,6 +2237,9 @@ class _MainScreenState extends State<MainScreen> implements MainView {
           bannerList.addAll(data.bannerURLs!.split(';'));
         }
 
+        extraClients = data.value!.extraClient;
+        _loadSavedClient();
+
         if (data.videoURL!.isNotEmpty) {
           checkAndNavigate(data.videoURL!);
         }
@@ -1761,6 +2249,9 @@ class _MainScreenState extends State<MainScreen> implements MainView {
 
         selectedCompany!.id = userData!.value!.companyId;
         selectedCompany!.name = userData!.value!.companyName;
+
+        PreferenceData.setSelectedCompanyId(userData!.value!.companyId!);
+        PreferenceData.setSelectedCompanyName(userData!.value!.companyName!);
 
         checkVersionUpdate(data.value!.appVersion!);
       } catch (e) {

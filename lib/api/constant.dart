@@ -6,8 +6,11 @@ class Constant {
   static String pdfUrl = 'http://103.116.176.78:8080/';
 
   static String androidPkg = 'com.mrtex.fab';
-  static String iOSPkg = 'com.ttms';
+  static String iOSPkg = 'com.mrtex.fab';
   static String iOSId = '1556868598';
+
+  static String adhat = 'MRTexAdhat';
+  static String agency = 'MRTexAgency';
 
   static const String userVerify = '${baseURL}appusers/GetUserVerificationBy';
   static const String login = '${baseURL}appusers/authenticateuser';

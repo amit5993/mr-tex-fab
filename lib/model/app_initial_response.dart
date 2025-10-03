@@ -42,9 +42,19 @@ class AppInitialData {
   List<MenuData>? drawerMenu;
   int? companyId;
   String? companyName;
+  List<dynamic>? extraMenu;
+  List<ExtraClient>? extraClient;
   AppVersion? appVersion;
 
-  AppInitialData({this.dashboard, this.drawerMenu, this.companyId, this.companyName, this.appVersion});
+  AppInitialData({
+    this.dashboard,
+    this.drawerMenu,
+    this.companyId,
+    this.companyName,
+    this.extraMenu,
+    this.extraClient,
+    this.appVersion
+  });
 
   AppInitialData.fromJson(Map<String, dynamic> json) {
     if (json['dashboard'] != null) {
@@ -61,6 +71,13 @@ class AppInitialData {
     }
     companyId = json['companyId'];
     companyName = json['companyName'];
+    extraMenu = json['extraMenu'];
+    if (json['extraClient'] != null) {
+      extraClient = <ExtraClient>[];
+      json['extraClient'].forEach((v) {
+        extraClient!.add(ExtraClient.fromJson(v));
+      });
+    }
     appVersion = json['appVersion'] != null ? AppVersion.fromJson(json['appVersion']) : null;
   }
 
@@ -74,6 +91,10 @@ class AppInitialData {
     }
     data['companyId'] = companyId;
     data['companyName'] = companyName;
+    data['extraMenu'] = extraMenu;
+    if (extraClient != null) {
+      data['extraClient'] = extraClient!.map((v) => v.toJson()).toList();
+    }
     if (appVersion != null) {
       data['appVersion'] = appVersion!.toJson();
     }
@@ -125,6 +146,68 @@ class MenuData {
       data['childMenu'] = childMenu!.map((v) => v.toJson()).toList();
     }
     data['parentId'] = parentId;
+    return data;
+  }
+}
+
+class ExtraClient {
+  String? token;
+  String? firstName;
+  String? clientLogo;
+  String? lastUpload;
+  int? companyId;
+  String? companyName;
+  String? fromDate;
+  String? uptoDate;
+  String? url;
+  int? clientId;
+  String? clientName;
+  String? roleName;
+
+  ExtraClient({
+    this.token,
+    this.firstName,
+    this.clientLogo,
+    this.lastUpload,
+    this.companyId,
+    this.companyName,
+    this.fromDate,
+    this.uptoDate,
+    this.url,
+    this.clientId,
+    this.clientName,
+    this.roleName
+  });
+
+  ExtraClient.fromJson(Map<String, dynamic> json) {
+    token = json['token'];
+    firstName = json['firstName'];
+    clientLogo = json['clientLogo'];
+    lastUpload = json['lastUpload'];
+    companyId = json['companyId'];
+    companyName = json['companyName'];
+    fromDate = json['fromDate'];
+    uptoDate = json['uptoDate'];
+    url = json['url'];
+    clientId = json['clientId'];
+    clientName = json['clientName'];
+    roleName = json['roleName'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['token'] = token;
+    data['firstName'] = firstName;
+    data['clientLogo'] = clientLogo;
+    data['lastUpload'] = lastUpload;
+    data['companyId'] = companyId;
+    data['companyName'] = companyName;
+    data['fromDate'] = fromDate;
+    data['uptoDate'] = uptoDate;
+    data['url'] = url;
+    data['clientId'] = clientId;
+    data['clientName'] = clientName;
+    data['roleName'] = roleName;
     return data;
   }
 }

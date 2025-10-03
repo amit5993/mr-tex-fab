@@ -87,7 +87,12 @@ class RestDataSource {
   }
 
   Future<AppInitialResponse> getAppInitialAPI() {
-    return _netUtil.post(Constant.getAppInitialAPI).then((dynamic res) {
+    Map requestBody = {
+      'PkgName': Platform.isAndroid ? Constant.androidPkg : Constant.iOSPkg,
+      'DeviceType': Platform.isAndroid ? 'ANDROID' : 'IOS',
+    };
+
+    return _netUtil.post(Constant.getAppInitialAPI,body: requestBody).then((dynamic res) {
       return AppInitialResponse.fromJson(res);
     });
   }

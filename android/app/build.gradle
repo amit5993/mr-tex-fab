@@ -55,9 +55,9 @@ android {
         versionCode 1
         versionName "1.0.0"
 
-//        storePassword 'technodesk'
-//        keyAlias 'key0'
-//        keyPassword 'technodesk'
+//        storePassword 'mrtexfab'
+//        keyAlias 'mrtexfab'
+//        keyPassword 'mrtexfab'
     }
 
     buildTypes {

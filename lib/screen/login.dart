@@ -10,11 +10,13 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:unique_identifier/unique_identifier.dart';
 
+import '../api/constant.dart';
 import '../common/check_response_code.dart';
 import '../model/login_response.dart';
 import '../model/user_verification_response.dart';
 import '../presenter/login_presenter.dart';
 import '../utils/color.dart';
+import '../utils/device_id_manager.dart';
 import '../utils/images.dart';
 import '../utils/preference.dart';
 import '../utils/string.dart';
@@ -40,7 +42,7 @@ class _LoginState extends State<Login> implements LoginView {
   var _passwordVisible = true;
   var isUserVerify = true;
   int selectedOption = 0;
-  var deviceId = '';
+  // var deviceId = '';
 
   _LoginState() {
     _presenter = LoginPresenter(this);
@@ -53,9 +55,9 @@ class _LoginState extends State<Login> implements LoginView {
     }
 
     if (selectedOption == 1) {
-      clientCodeController.text = 'MRTexAdhat';
+      clientCodeController.text = Constant.adhat;
     } else {
-      clientCodeController.text = 'MRTexAgency';
+      clientCodeController.text = Constant.agency;
     }
 
     var uName = userNameController.text.toString().trim();
@@ -79,10 +81,10 @@ class _LoginState extends State<Login> implements LoginView {
         toastMassage(sPasswordError);
         return;
       }
-      _presenter!.doLogin(uName, cCode, pass, deviceId);
+      _presenter!.doLogin(uName, cCode, pass, PreferenceData.getDeviceId());
       return;
     }
-    _presenter!.doUserVerification(uName, cCode, deviceId);
+    _presenter!.doUserVerification(uName, cCode, PreferenceData.getDeviceId());
   }
 
   @override
@@ -104,21 +106,31 @@ class _LoginState extends State<Login> implements LoginView {
   }
 
   initUniqueIdentifierState() async {
+    var deviceId = '';
     try {
-      deviceId = (await UniqueIdentifier.serial)!;
-    } on PlatformException {
-      final deviceInfoPlugin = DeviceInfoPlugin();
-      if (Platform.isAndroid) {
-        final deviceInfo = await deviceInfoPlugin.androidInfo;
-        deviceId = deviceInfo.id;
-      } else {
-        final deviceInfo = await deviceInfoPlugin.iosInfo;
-        deviceId = deviceInfo.identifierForVendor!;
+      // Use the new DeviceIdManager to get a persistent device ID
+      deviceId = await DeviceIdManager.getPersistentDeviceId();
+    } catch (e) {
+      print("Error getting device ID: $e");
+      // Fallback to the old method if something goes wrong
+      try {
+        deviceId = (await UniqueIdentifier.serial)!;
+      } on PlatformException {
+        final deviceInfoPlugin = DeviceInfoPlugin();
+        if (Platform.isAndroid) {
+          final deviceInfo = await deviceInfoPlugin.androidInfo;
+          deviceId = deviceInfo.id;
+        } else {
+          final deviceInfo = await deviceInfoPlugin.iosInfo;
+          deviceId = deviceInfo.identifierForVendor!;
+        }
       }
     }
 
-    if (!mounted) return '';
-    print(deviceId);
+    PreferenceData.setDeviceId(deviceId);
+
+    if (!mounted) return;
+    print("Using device ID: $deviceId");
   }
 
   @override

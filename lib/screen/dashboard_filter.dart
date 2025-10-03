@@ -14,6 +14,7 @@ import '../model/dashboard_filter_response.dart';
 import '../model/dashboard_response.dart';
 import '../presenter/dashboard_filter_presenter.dart';
 import '../utils/images.dart';
+import '../utils/preference.dart';
 import '../utils/string.dart';
 import '../utils/widget.dart';
 
@@ -58,9 +59,8 @@ class _DashboardFilterState extends State<DashboardFilter> implements DashboardF
     if (filterList.isNotEmpty) {
       selectedGroup = filterList[0];
     }
-    if (companyList.isNotEmpty) {
-      selectedCompany = companyList[0];
-    }
+
+    setDefaultCompany();
 
     filterSearchList.add("Name Asc");
     filterSearchList.add("Name Desc");
@@ -70,6 +70,28 @@ class _DashboardFilterState extends State<DashboardFilter> implements DashboardF
     sortBy = 'Amount Desc';
 
     _presenter!.getDashboardFilter(search, sortBy, mode, selectedGroup, selectedCompany!.id!.toString());
+  }
+
+  setDefaultCompany() {
+    if (companyList.isNotEmpty) {
+      // Get saved company ID and name from preferences
+      String? savedCompanyId = PreferenceData.getSelectedCompanyId().toString();
+      String? savedCompanyName = PreferenceData.getSelectedCompanyName();
+
+      // Try to find the saved company in the company list
+      if (savedCompanyId != null && savedCompanyId != "null" && savedCompanyId.isNotEmpty) {
+        // Find company in the list that matches the saved ID
+        Company? matchedCompany = companyList.firstWhere(
+              (company) => company.id.toString() == savedCompanyId,
+          orElse: () => companyList[0], // Default to first company if not found
+        );
+
+        selectedCompany = matchedCompany;
+      } else {
+        // If no saved company or invalid data, default to first company
+        selectedCompany = companyList[0];
+      }
+    }
   }
 
   // List<ChartData> _mapDashboardFilterDataToChartData(List<DashboardFilterData> dataList) {

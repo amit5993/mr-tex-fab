@@ -500,9 +500,8 @@ class _UserManagerState extends State<UserManager> implements UserManagerView {
                     onTap: (() async {
                       //confirmationDialog1(context, i, data.userId!, data.clientId!);
                       customConfirmationDialog(
-                          context, 'Confirmation...!', 'Are you sure you want to delete this user?', 'Yes', 'No',
-                          () {
-                        _presenter!.deleteUser(i, data.userId!, data.clientId!);
+                          context, 'Confirmation...!', 'Are you sure you want to delete this user?', 'Yes', 'No', () {
+                        _presenter!.deleteUser(i, data.clientId!, data.userId!);
                       });
                     }),
                     child: iconWidget(const Color(0xFFF44336), icDelete),
