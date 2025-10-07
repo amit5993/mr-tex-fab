@@ -1,10 +1,10 @@
-String appName = 'M.R. Tex Fab';
-String sApplicationName = 'M.R. Tex Fab';
+String appName = 'M R Tex Fab';
+String sApplicationName = 'M R Tex Fab';
 
 String checkInternetPermission = 'No internet connection. Make sure that Wi-Fi or Mobile data is turned on, then try again.';
 
 //preload
-String sWelcomePreload = 'Welcome To M.R. Tex Fab';
+String sWelcomePreload = 'Welcome To M R Tex Fab';
 String sSignIn = 'SIGN IN';
 String sDashboard = 'DASHBOARD';
 String sFullName = 'Full Name';

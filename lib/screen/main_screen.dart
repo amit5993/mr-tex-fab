@@ -142,6 +142,15 @@ class _MainScreenState extends State<MainScreen> implements MainView {
             return;
           }
         }
+      } else {
+        for (var client in extraClients!) {
+          if (client.token == PreferenceData.getToken()) {
+            setState(() {
+              currentExtraClient = client;
+            });
+            return;
+          }
+        }
       }
 
       // If no saved client found or ID doesn't match any client, set the first client as default
@@ -457,6 +466,7 @@ class _MainScreenState extends State<MainScreen> implements MainView {
           padding: const EdgeInsets.all(10),
           child: Row(
             children: [
+              // Avatar with active indicator
               Stack(
                 alignment: Alignment.bottomRight,
                 children: [
@@ -500,53 +510,28 @@ class _MainScreenState extends State<MainScreen> implements MainView {
                 ],
               ),
 
-              horizontalView(),
-              horizontalViewSmall(),
+              const SizedBox(width: 8), // Fixed width spacing
 
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    client.clientName ?? 'Unknown Client',
-                    //textAlign: TextAlign.center,
-                    style: heading1(isActive ? colorApp : colorBlack),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  //verticalViewSmall(),
-                  Text(
-                    client.companyName ?? '',
-                    textAlign: TextAlign.center,
-                    style: bodyText3(colorText.withOpacity(0.7)),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
+              // Text content with Expanded to handle overflow
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      client.clientName ?? 'Unknown Client',
+                      style: heading1(isActive ? colorApp : colorBlack),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Text(
+                      client.companyName ?? '',
+                      style: bodyText3(colorText.withOpacity(0.7)),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
               ),
-
-              //verticalView(),
-              // Container(
-              //   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              //   decoration: BoxDecoration(
-              //     color: isActive ? colorApp : Colors.grey.withOpacity(0.2),
-              //     borderRadius: BorderRadius.circular(20),
-              //   ),
-              //   child: Row(
-              //     mainAxisSize: MainAxisSize.min,
-              //     children: [
-              //       Icon(
-              //         isActive ? Icons.check_circle : Icons.login,
-              //         size: 16,
-              //         color: isActive ? colorWhite : colorText,
-              //       ),
-              //       const SizedBox(width: 6),
-              //       Text(
-              //         isActive ? 'Active' : 'Switch',
-              //         style: bodyText2(isActive ? colorWhite : colorText),
-              //       ),
-              //     ],
-              //   ),
-              // ),
             ],
           ),
         ),
@@ -2247,11 +2232,11 @@ class _MainScreenState extends State<MainScreen> implements MainView {
         sTitle = sApplicationName;
         lastUpdate = data.lastUpload!;
 
-        selectedCompany!.id = userData!.value!.companyId;
-        selectedCompany!.name = userData!.value!.companyName;
+        selectedCompany!.id = data.value!.companyId;
+        selectedCompany!.name = data.value!.companyName;
 
-        PreferenceData.setSelectedCompanyId(userData!.value!.companyId!);
-        PreferenceData.setSelectedCompanyName(userData!.value!.companyName!);
+        PreferenceData.setSelectedCompanyId(data.value!.companyId!);
+        PreferenceData.setSelectedCompanyName(data.value!.companyName!);
 
         checkVersionUpdate(data.value!.appVersion!);
       } catch (e) {

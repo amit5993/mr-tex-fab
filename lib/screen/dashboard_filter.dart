@@ -125,11 +125,13 @@ class _DashboardFilterState extends State<DashboardFilter> implements DashboardF
   final List<String> chartTypes = [
     'Line Chart',
     'Area Chart',
-    'Spline Chart',
     'Column Chart',
-    'Step Line Chart',
-    'Bar Chart',
-    'Spline Area Chart'
+    'Pie Chart',     // Added Pie Chart
+    'Donut Chart',   // Added Donut Chart
+    // 'Spline Chart',
+    // 'Step Line Chart',
+    // 'Bar Chart',
+    // 'Spline Area Chart'
   ];
 
   Widget _buildChart() {
@@ -151,6 +153,58 @@ class _DashboardFilterState extends State<DashboardFilter> implements DashboardF
               markerSettings: MarkerSettings(isVisible: true),
             ),
           ],
+        );
+      case 'Pie Chart':
+        return SfCircularChart(
+          legend: Legend(
+            isVisible: true,
+            overflowMode: LegendItemOverflowMode.wrap,
+            position: LegendPosition.bottom,
+          ),
+          series: <CircularSeries>[
+            PieSeries<ChartData, String>(
+              dataSource: _mapDashboardFilterDataToChartData(list),
+              xValueMapper: (ChartData data, _) => data.data,
+              yValueMapper: (ChartData data, _) => data.sales,
+              dataLabelSettings: DataLabelSettings(
+                isVisible: true,
+                labelPosition: ChartDataLabelPosition.outside,
+                connectorLineSettings: ConnectorLineSettings(type: ConnectorType.curve),
+              ),
+              // Enable tooltip
+              enableTooltip: true,
+              // Set explosion for segments (optional)
+              explodeIndex: 0,
+            )
+          ],
+          tooltipBehavior: TooltipBehavior(enable: true),
+        );
+      case 'Donut Chart':
+        return SfCircularChart(
+          legend: Legend(
+            isVisible: true,
+            overflowMode: LegendItemOverflowMode.wrap,
+            position: LegendPosition.bottom,
+          ),
+          series: <CircularSeries>[
+            DoughnutSeries<ChartData, String>(
+              dataSource: _mapDashboardFilterDataToChartData(list),
+              xValueMapper: (ChartData data, _) => data.data,
+              yValueMapper: (ChartData data, _) => data.sales,
+              dataLabelSettings: DataLabelSettings(
+                isVisible: true,
+                labelPosition: ChartDataLabelPosition.outside,
+                connectorLineSettings: ConnectorLineSettings(type: ConnectorType.curve),
+              ),
+              // Set the inner radius for donut hole
+              innerRadius: '40%',
+              // Enable tooltip
+              enableTooltip: true,
+              // Set explosion for segments (optional)
+              explodeIndex: 0,
+            )
+          ],
+          tooltipBehavior: TooltipBehavior(enable: true),
         );
       case 'Spline Chart':
         return SfCartesianChart(
@@ -237,6 +291,16 @@ class _DashboardFilterState extends State<DashboardFilter> implements DashboardF
           ],
         );
     }
+  }
+
+  // Helper method to calculate the total value for pie/donut chart percentages
+  double _getTotalValue() {
+    double total = 0;
+    List<ChartData> chartData = _mapDashboardFilterDataToChartData(list);
+    for (var data in chartData) {
+      total += data.sales;
+    }
+    return total;
   }
 
   @override

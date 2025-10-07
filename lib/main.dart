@@ -65,7 +65,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'M.R. Tex Fab',
+      title: 'M R Tex Fab',
       home: const Splash(),
       builder: EasyLoading.init(),
       getPages: RouterFile.Router.route,
