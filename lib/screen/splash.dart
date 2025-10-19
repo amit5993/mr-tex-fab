@@ -80,7 +80,7 @@ class _SplashState extends State<Splash> with SingleTickerProviderStateMixin {
         if (Platform.isIOS) {
           Get.offNamed('/preload');
         } else {
-          Get.offNamed('/login');
+          Get.offNamed('/pre_login');
         }
       }
     }

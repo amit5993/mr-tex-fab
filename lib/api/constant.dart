@@ -7,7 +7,7 @@ class Constant {
 
   static String androidPkg = 'com.mrtex.fab';
   static String iOSPkg = 'com.mrtex.fab';
-  static String iOSId = '1556868598';
+  static String iOSId = '6753016759';
 
   static String adhat = 'MRTexAdhat';
   static String agency = 'MRTexAgency';

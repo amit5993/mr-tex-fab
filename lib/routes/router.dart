@@ -26,6 +26,7 @@ import '../screen/order_number.dart';
 import '../screen/pdf_viewer.dart';
 import '../screen/phone_auth.dart';
 import '../screen/preload.dart';
+import '../screen/pre_login.dart';
 import '../screen/product.dart';
 import '../screen/product_details.dart';
 import '../screen/receive_list.dart';
@@ -36,6 +37,7 @@ import '../screen/video_ads.dart';
 class Router {
   static final route = [
     GetPage(name: '/splash', page: () => const Splash()),
+    GetPage(name: '/pre_login', page: () => const PreLogin()),
     GetPage(name: '/login', page: () => const Login()),
     GetPage(name: '/preload', page: () => const Preload()),
     GetPage(name: '/product', page: () => const Product()),
